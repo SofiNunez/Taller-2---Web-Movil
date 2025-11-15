@@ -1,135 +1,79 @@
 // src/controllers/pokemon.controller.ts
 import { Request, Response } from 'express';
 import { pool } from '../../utils/db';
-
-export interface Pokemon {
-  id: number;
-  name: string;
-  type1: string;
-  type2?: string;
-  height: number;
-  weight: number;
-  hp: number;
-  attack: number;
-  defense: number;
-  speed: number;
-  image_url?: string;
-}
-
-export interface PokemonCreate {
-  name: string;
-  type1: string;
-  type2?: string;
-  height: number;
-  weight: number;
-  hp: number;
-  attack: number;
-  defense: number;
-  speed: number;
-  image_url?: string;
-}
+import { Pokemon, PokemonCreate } from './pokemon-model';
 
 export class PokemonService {
   // Obtener todos los pokémon
-  async getAll(req: Request, res: Response): Promise<void> {
-    try {
-      const { rows } = await pool.query<Pokemon>(
-        'SELECT * FROM pokemons ORDER BY id'
-      );
-      res.json({
-        count: rows.length,
-        results: rows
-      });
-    } catch (error) {
-      res.status(500).json({ error: 'Error al obtener pokémon' });
-    }
+  async getAll(): Promise<Pokemon[]> {
+    const { rows } = await pool.query<Pokemon>(
+      'SELECT * FROM pokemons ORDER BY id'
+    );
+
+    return rows;
   }
 
   // Obtener un pokémon por ID
-  async getById(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
+  async getById(id: number): Promise<Pokemon | null> {
       const { rows } = await pool.query<Pokemon>(
         'SELECT * FROM pokemons WHERE id = $1',
         [id]
       );
       
       if (rows.length === 0) {
-        res.status(404).json({ error: 'Pokémon no encontrado' });
-        return;
+        return null;
       }
-      
-      res.json(rows[0]);
-    } catch (error) {
-      res.status(500).json({ error: 'Error al obtener pokémon' });
-    }
+
+      else {
+        return rows[0]
+      }
   }
 
   // Obtener un pokémon por nombre
-  async getByName(req: Request, res: Response): Promise<void> {
-    try {
-      const { name } = req.params;
+  async getByName(name: string): Promise<Pokemon | null> {
       const { rows } = await pool.query<Pokemon>(
         'SELECT * FROM pokemons WHERE LOWER(name) = LOWER($1)',
         [name]
       );
-      
+
       if (rows.length === 0) {
-        res.status(404).json({ error: 'Pokémon no encontrado' });
-        return;
+        return null;
       }
-      
-      res.json(rows[0]);
-    } catch (error) {
-      res.status(500).json({ error: 'Error al obtener pokémon' });
-    }
+
+      else {
+        return rows[0]
+      }
   }
 
-  // Buscar pokémon por tipo
-  async getByType(req: Request, res: Response): Promise<void> {
-    try {
-      const { type } = req.params;
-      const { rows } = await pool.query<Pokemon>(
-        'SELECT * FROM pokemons WHERE LOWER(type1) = LOWER($1) OR LOWER(type2) = LOWER($1)',
-        [type]
-      );
-      
-      res.json({
-        count: rows.length,
-        type: type,
-        results: rows
-      });
-    } catch (error) {
-      res.status(500).json({ error: 'Error al buscar por tipo' });
-    }
+  // Buscar pokémon por tipos
+  async getByType(type: string): Promise<Pokemon[]> {
+    const { rows } = await pool.query<Pokemon>(
+      'SELECT * FROM pokemons WHERE LOWER(type1) = LOWER($1) OR LOWER(type2) = LOWER($1)',
+      [type]
+    );
+    return rows;
   }
 
   // Crear un nuevo pokémon
-  async create(req: Request, res: Response): Promise<void> {
-    try {
-      const pokemon: PokemonCreate = req.body;
-      const { rows } = await pool.query<Pokemon>(
-        `INSERT INTO pokemons (name, type1, type2, height, weight, hp, attack, defense, speed, image_url)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-         RETURNING *`,
-        [
-          pokemon.name,
-          pokemon.type1,
-          pokemon.type2 || null,
-          pokemon.height,
-          pokemon.weight,
-          pokemon.hp,
-          pokemon.attack,
-          pokemon.defense,
-          pokemon.speed,
-          pokemon.image_url || null
-        ]
-      );
-      
-      res.status(201).json(rows[0]);
-    } catch (error) {
-      res.status(500).json({ error: 'Error al crear pokémon' });
-    }
+  async create(pokemon: PokemonCreate): Promise<Pokemon> {
+    const { rows } = await pool.query<Pokemon>(
+      `INSERT INTO pokemons (name, type1, type2, height, weight, hp, attack, defense, speed, image_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING *`,
+      [
+        pokemon.name,
+        pokemon.type1,
+        pokemon.type2 || null,
+        pokemon.height,
+        pokemon.weight,
+        pokemon.hp,
+        pokemon.attack,
+        pokemon.defense,
+        pokemon.speed,
+        pokemon.image_url || null
+      ]
+    );
+    return rows[0];
   }
 
   // Actualizar un pokémon
@@ -179,22 +123,18 @@ export class PokemonService {
   }
 
   // Eliminar un pokémon
-  async delete(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const { rowCount } = await pool.query(
+  async delete(id:number): Promise<number | null> {
+      const result = await pool.query(
         'DELETE FROM pokemons WHERE id = $1',
         [id]
       );
-      
-      if (rowCount === 0) {
-        res.status(404).json({ error: 'Pokémon no encontrado' });
-        return;
+
+      if (result.rowCount === 0) {
+        return null;
       }
-      
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ error: 'Error al eliminar pokémon' });
-    }
+
+      else {
+        return result.rowCount;
+      }
   }
 }

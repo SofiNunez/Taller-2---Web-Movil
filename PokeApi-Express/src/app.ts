@@ -2,6 +2,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import pokemonRoutes from './modules/pokemons/pokemon-route';
+import { PokemonService } from './modules/pokemons/pokemon-service';
 import { initializeDatabase } from './utils/db';
 
 const app = express();
@@ -36,6 +37,7 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`🚀 Server running in http://localhost:${PORT}`);
     });
+
   } catch (error) {
     console.error('Error al iniciar el servidor:', error);
     process.exit(1);
