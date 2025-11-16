@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cócteles</title>
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+
+    h1 { text-align: center; }
+
+    #searchBar, #filterAlcoholic {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #aaa;
+      margin-bottom: 20px;
+    }
+
+    #cocktails {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    /* MODAL */
+    #modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    #modalContent {
+      background: white;
+      width: 90%;
+      max-width: 400px;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      animation: fadeIn 0.2s;
+    }
+
+    #modalContent img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #closeBtn {
+      background: #d9534f;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #closeBtn:hover {
+      background: #c9302c;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Catálogo de Cócteles</h1>
+
+  <input id="searchBar" type="text" placeholder="Buscar cóctel...">
+  <select id="filterAlcoholic">
+    <option value="all">Todos</option>
+    <option value="Alcoholic">Con Alcohol</option>
+    <option value="Non alcoholic">Sin alcohol</option>
+  </select>
+
+  <div id="cocktails"></div>
+
+  <!-- MODAL DE DETALLE -->
+  <div id="modal">
+    <div id="modalContent">
+      <img id="modalImg">
+      <h2 id="modalName"></h2>
+      <p><b>Categoría:</b> <span id="modalCategory"></span></p>
+      <p><b>Tipo:</b> <span id="modalAlcoholic"></span></p>
+      <p><b>Vaso:</b> <span id="modalGlass"></span></p>
+      <p><b>Instrucciones:</b></p>
+      <p id="modalInstructions"></p>
+      <button id="closeBtn">Cerrar</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:3000/cocktails";
+    let allCocktails = [];
+
+    function loadCocktails() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          allCocktails = data;
+          render(data);
+        });
+    }
+
+    loadCocktails();
+
+    function render(list) {
+      const cont = document.getElementById("cocktails");
+      cont.innerHTML = "";
+
+      list.forEach(c => {
+        cont.innerHTML += `
+          <div class="card" onclick="openModal(${c.id})">
+            <img src="${c.thumbnail || 'https://via.placeholder.com/250'}">
+            <h3>${c.name}</h3>
+            <p>${c.alcoholic || '---'}</p>
+          </div>
+        `;
+      });
+    }
+
+    // =======================
+    // BUSCAR
+    // =======================
+    document.getElementById("searchBar").addEventListener("input", (e) => {
+      const text = e.target.value.toLowerCase();
+      let filtered = allCocktails.filter(c => c.name.toLowerCase().includes(text));
+      applyAlcoholFilter(filtered);
+    });
+
+    // =======================
+    // FILTRO ALCOHOL
+    // =======================
+    document.getElementById("filterAlcoholic").addEventListener("change", () => {
+      applyFilters();
+    });
+
+    function applyFilters() {
+      const searchText = document.getElementById("searchBar").value.toLowerCase();
+      let filtered = allCocktails.filter(c => c.name.toLowerCase().includes(searchText));
+      applyAlcoholFilter(filtered);
+    }
+
+    function applyAlcoholFilter(list) {
+      const alcoholFilter = document.getElementById("filterAlcoholic").value;
+      let filtered = list;
+
+      if (alcoholFilter !== "all") {
+        filtered = list.filter(c => c.alcoholic === alcoholFilter);
+      }
+
+      render(filtered);
+    }
+
+    // =======================
+    // MODAL DE DETALLE
+    // =======================
+    function openModal(id) {
+      const c = allCocktails.find(x => x.id === id);
+
+      document.getElementById("modalImg").src = c.thumbnail;
+      document.getElementById("modalName").innerText = c.name;
+      document.getElementById("modalCategory").innerText = c.category || "—";
+      document.getElementById("modalAlcoholic").innerText = c.alcoholic || "—";
+      document.getElementById("modalGlass").innerText = c.glass || "—";
+      document.getElementById("modalInstructions").innerText = c.instructions || "—";
+
+      document.getElementById("modal").style.display = "flex";
+    }
+
+    document.getElementById("closeBtn").onclick = () => {
+      document.getElementById("modal").style.display = "none";
+    };
+
+    window.onclick = (e) => {
+      if (e.target.id === "modal") {
+        document.getElementById("modal").style.display = "none";
+      }
+    };
+  </script>
+
+</body>
+</html>
