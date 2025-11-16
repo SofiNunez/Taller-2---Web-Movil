@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeAPI Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #b8a8e8 0%, #a899d8 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            color: #1a1a2e;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #1a0f3e 0%, #2d1b5e 100%);
+            padding: 40px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .pokemon-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .pokemon-card:hover {
+            transform: scale(1.05);
+        }
+
+        .pokemon-card img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        .pokemon-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+
+        .types {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .type-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            color: white;
+            margin: 50px 0;
+        }
+
+        .error {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card-icon {
+                font-size: 3rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 PokeAPI Explorer</h1>
+        </div>
+
+        <div class="grid">
+            <div class="card" onclick="openModal('all')">
+                <div class="card-icon">⚡</div>
+                <h2>Todos los Pokémon</h2>
+                <p>Explora la colección completa de Pokémon disponibles en la base de datos</p>
+            </div>
+
+            <div class="card" onclick="openModal('search')">
+                <div class="card-icon">🔍</div>
+                <h2>Buscar Pokémon</h2>
+                <p>Encuentra tu Pokémon favorito por nombre o explora por tipos específicos</p>
+            </div>
+
+            <div class="card" onclick="openModal('types')">
+                <div class="card-icon">🌟</div>
+                <h2>Buscar por Tipo</h2>
+                <p>Descubre Pokémon organizados por sus tipos elementales</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        async function getAll() {
+            try {
+                const response = await fetch(`${API_URL}/pokemon`);
+                const data = await response.json();
+                return data.results;
+            } catch (error) {
+                console.error('Error:', error);
+                return [];
+            }
+        }
+
+        async function getByName(name) {
+            try {
+                const response = await fetch(`${API_URL}/pokemon/name/${name}`);
+                if (response.ok) {
+                    return await response.json();
+                }
+                return null;
+            } catch (error) {
+                console.error('Error:', error);
+                return null;
+            }
+        }
+
+        async function getByType(type) {
+            try {
+                const response = await fetch(`${API_URL}/pokemon/type/${type}`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error:', error);
+                return [];
+            }
+        }
+
+        function displayPokemons(pokemons, container) {
+            container.innerHTML = '<div class="pokemon-list">' + pokemons.map(pokemon => `
+                <div class="pokemon-card">
+                    <img src="${pokemon.image_url || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'}" 
+                         alt="${pokemon.name}"
+                         onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'">
+                    <h3>${pokemon.name}</h3>
+                    <div class="types">
+                        <span class="type-badge">${pokemon.type1}</span>
+                        ${pokemon.type2 ? `<span class="type-badge">${pokemon.type2}</span>` : ''}
+                    </div>
+                    <div class="stats">
+                        <div class="stat">HP: ${pokemon.hp}</div>
+                        <div class="stat">ATK: ${pokemon.attack}</div>
+                        <div class="stat">DEF: ${pokemon.defense}</div>
+                        <div class="stat">SPD: ${pokemon.speed}</div>
+                        <div class="stat">H: ${pokemon.height}m</div>
+                        <div class="stat">W: ${pokemon.weight}kg</div>
+                    </div>
+                </div>
+            `).join('') + '</div>';
+        }
+
+        async function openModal(type) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modal-body');
+            modal.style.display = 'block';
+
+            modalBody.innerHTML = '<div class="loading">Cargando...</div>';
+
+            if (type === 'all') {
+                modalBody.innerHTML = '<h2>Todos los Pokémon</h2>';
+                const pokemons = await getAll();
+                displayPokemons(pokemons, modalBody);
+            } else if (type === 'search') {
+                modalBody.innerHTML = `
+                    <h2>Buscar Pokémon</h2>
+                    <input type="text" class="search-bar" id="searchInput" placeholder="Escribe el nombre del Pokémon...">
+                    <div id="searchResults"></div>
+                `;
+                document.getElementById('searchInput').addEventListener('input', async (e) => {
+                    const name = e.target.value.toLowerCase().trim();
+                    const resultsDiv = document.getElementById('searchResults');
+                    if (name.length > 0) {
+                        const pokemon = await getByName(name);
+                        if (pokemon) {
+                            displayPokemons([pokemon], resultsDiv);
+                        } else {
+                            resultsDiv.innerHTML = '<div class="error">Pokémon no encontrado</div>';
+                        }
+                    } else {
+                        resultsDiv.innerHTML = '';
+                    }
+                });
+            } else if (type === 'types') {
+                modalBody.innerHTML = `
+                    <h2>Buscar por Tipo</h2>
+                    <select class="search-bar" id="typeSelect">
+                        <option value="">Selecciona un tipo...</option>
+                        <option value="fire">Fuego 🔥</option>
+                        <option value="water">Agua 💧</option>
+                        <option value="grass">Planta 🌿</option>
+                        <option value="electric">Eléctrico ⚡</option>
+                        <option value="normal">Normal ⭐</option>
+                        <option value="fighting">Lucha 🥊</option>
+                        <option value="poison">Veneno ☠️</option>
+                        <option value="ground">Tierra 🌍</option>
+                        <option value="rock">Roca 🪨</option>
+                        <option value="fairy">Hada 🧚</option>
+                        <option value="psychic">Psíquico 🔮</option>
+                    </select>
+                    <div id="typeResults"></div>
+                `;
+                document.getElementById('typeSelect').addEventListener('change', async (e) => {
+                    const type = e.target.value;
+                    const resultsDiv = document.getElementById('typeResults');
+                    if (type) {
+                        resultsDiv.innerHTML = '<div class="loading">Buscando...</div>';
+                        const pokemons = await getByType(type);
+                        if (pokemons.length > 0) {
+                            displayPokemons(pokemons, resultsDiv);
+                        } else {
+                            resultsDiv.innerHTML = '<div class="error">No se encontraron Pokémon de este tipo</div>';
+                        }
+                    } else {
+                        resultsDiv.innerHTML = '';
+                    }
+                });
+            } 
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

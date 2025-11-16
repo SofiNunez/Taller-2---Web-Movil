@@ -39,7 +39,7 @@ router.get("/pokemon/id/:id", async (req: any, res: any) => {
 router.get("/pokemon/name/:name", async (req: any, res: any) => {
     try {
       const { name } = req.params;
-      const pokemon = await pokemonService.getById(name);
+      const pokemon = await pokemonService.getByName(name);
 
       if (pokemon === null) {
         res.status(404).json({ error: 'Pokémon no encontrado' });
@@ -48,6 +48,7 @@ router.get("/pokemon/name/:name", async (req: any, res: any) => {
         
       res.json(pokemon);
       } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Error al obtener el Pokémon' });
       }
 });
