@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>MealsDB - Taller 2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    
+    <header class="mb-6 text-center">
+      <h1 class="text-2xl md:text-3xl font-bold text-slate-900">
+        MealsDB FastApi
+      </h1>
+      <p class="text-xs md:text-sm text-slate-600 mt-1">
+        API incluye (FastAPI + PostgreSQL + TheMealDB)
+      </p>
+    </header>
+
+    
+    <section class="bg-white rounded-2xl shadow-lg shadow-slate-200 p-4 md:p-5 space-y-4">
+      
+      
+      <div class="space-y-2">
+        <h2 class="text-base md:text-lg font-semibold text-slate-900">
+          Buscar por nombre
+          <span class="text-[11px] md:text-xs font-normal text-slate-500">
+            (GET /search.php?s=)
+          </span>
+        </h2>
+
+        
+        <form id="formSearch" class="flex flex-col gap-3 md:flex-row md:items-end">
+          <div class="flex-1">
+            <label for="searchName" class="block text-[11px] md:text-xs font-medium text-slate-600 mb-1">
+              Nombre de la comida
+            </label>
+            <input
+              id="searchName"
+              type="text"
+              placeholder="Ej: chicken, beef, pasta..."
+              class="input"
+            />
+          </div>
+
+          <div class="flex gap-2 flex-wrap">
+            <button type="submit" class="btn-primary">
+              Buscar
+            </button>
+            <button type="button" id="btnSync" class="btn-green">
+              Sync + Buscar
+            </button>
+            <button type="button" id="btnClear" class="btn-gray">
+              Limpiar
+            </button>
+          </div>
+        </form>
+
+        <p id="statusSearch" class="status"></p>
+      </div>
+
+      <hr class="border-slate-200" />
+
+      
+      <div class="space-y-2">
+        <h2 class="text-base md:text-lg font-semibold text-slate-900">
+          Buscar por ID
+          <span class="text-[11px] md:text-xs font-normal text-slate-500">
+            (GET /lookup.php?i=)
+          </span>
+        </h2>
+
+        <form id="formLookup" class="flex flex-col gap-3 md:flex-row md:items-end">
+          <div class="flex-1 max-w-xs">
+            <label for="searchId" class="block text-[11px] md:text-xs font-medium text-slate-600 mb-1">
+              ID de la comida
+            </label>
+            <input
+              id="searchId"
+              type="number"
+              placeholder="Ej: 52772"
+              class="input"
+            />
+          </div>
+
+          <button type="submit" class="btn-indigo">
+            Buscar por ID
+          </button>
+        </form>
+
+        <p id="statusLookup" class="status"></p>
+      </div>
+
+      <hr class="border-slate-200" />
+
+     
+      <div class="space-y-2">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <h2 class="text-base md:text-lg font-semibold text-slate-900">
+            Resultados
+          </h2>
+          <span class="text-[11px] md:text-xs text-slate-500">
+            
+          </span>
+        </div>
+
+        
+        <div id="results" class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-2">
+          
+        </div>
+
+        <p id="noResults" class="text-center text-sm text-slate-500 mt-2 hidden">
+          No hay resultados para mostrar.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  
+  <script src="script.js"></script>
+</body>
+</html>
