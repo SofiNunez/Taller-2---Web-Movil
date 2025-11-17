@@ -1,0 +1,258 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PokeAPI - Documentación",
+    "version": "1.0.0",
+    "description": "API REST para gestionar Pokémon usando Express.js"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor local"
+    }
+  ],
+  "paths": {
+    "/pokemon": {
+      "get": {
+        "summary": "Obtener todos los Pokémon",
+        "tags": ["Pokémon"],
+        "responses": {
+          "200": {
+            "description": "Listado de Pokémon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Pokemon"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error del servidor"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear un nuevo Pokémon",
+        "tags": ["Pokémon"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PokemonCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pokémon creado exitosamente"
+          },
+          "500": { "description": "Error del servidor" }
+        }
+      }
+    },
+
+    "/pokemon/id/{id}": {
+      "get": {
+        "summary": "Obtener Pokémon por ID",
+        "tags": ["Pokémon"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pokémon encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pokemon"
+                }
+              }
+            }
+          },
+          "404": { "description": "Pokémon no encontrado" },
+          "500": { "description": "Error del servidor" }
+        }
+      }
+    },
+
+    "/pokemon/name/{name}": {
+      "get": {
+        "summary": "Obtener Pokémon por nombre",
+        "tags": ["Pokémon"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pokémon encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pokemon"
+                }
+              }
+            }
+          },
+          "404": { "description": "Pokémon no encontrado" },
+          "500": { "description": "Error del servidor" }
+        }
+      }
+    },
+
+    "/pokemon/type/{type}": {
+      "get": {
+        "summary": "Obtener Pokémon por tipo",
+        "tags": ["Pokémon"],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pokémon encontrados por tipo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pokemon"
+                  }
+                }
+              }
+            }
+          },
+          "500": { "description": "Error del servidor" }
+        }
+      }
+    },
+
+    "/pokemon/{id}": {
+      "put": {
+        "summary": "Actualizar Pokémon por ID",
+        "tags": ["Pokémon"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PokemonCreate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Pokémon actualizado" },
+          "404": { "description": "Pokémon no encontrado" },
+          "500": { "description": "Error del servidor" }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar Pokémon por ID",
+        "tags": ["Pokémon"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Pokémon eliminado" },
+          "404": { "description": "Pokémon no encontrado" },
+          "500": { "description": "Error del servidor" }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "schemas": {
+      "Pokemon": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Pikachu" },
+          "type1": { "type": "string", "example": "Electric" },
+          "type2": { "type": "string", "nullable": true, "example": null },
+          "height": { "type": "number", "example": 0.4 },
+          "weight": { "type": "number", "example": 6.0 },
+          "hp": { "type": "integer", "example": 35 },
+          "attack": { "type": "integer", "example": 55 },
+          "defense": { "type": "integer", "example": 40 },
+          "speed": { "type": "integer", "example": 90 },
+          "image_url": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/pikachu.png"
+          }
+        }
+      },
+
+      "PokemonCreate": {
+        "type": "object",
+        "required": [
+          "name",
+          "type1",
+          "height",
+          "weight",
+          "hp",
+          "attack",
+          "defense",
+          "speed"
+        ],
+        "properties": {
+          "name": { "type": "string", "example": "Bulbasaur" },
+          "type1": { "type": "string", "example": "Grass" },
+          "type2": { "type": "string", "nullable": true, "example": "Poison" },
+          "height": { "type": "number", "example": 0.7 },
+          "weight": { "type": "number", "example": 6.9 },
+          "hp": { "type": "integer", "example": 45 },
+          "attack": { "type": "integer", "example": 49 },
+          "defense": { "type": "integer", "example": 49 },
+          "speed": { "type": "integer", "example": 45 },
+          "image_url": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/bulbasaur.png"
+          }
+        }
+      }
+    }
+  }
+}
